@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - image:  router:latest
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         name:  router-server
         resources:
           requests:
