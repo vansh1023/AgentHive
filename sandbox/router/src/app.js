@@ -25,6 +25,14 @@ function getProxy(sandboxId) {
             target,
             changeOrigin: true,
             ws: true,
+            onError: (err, req, res) => {
+                console.error(`[Proxy Error] Preview ${sandboxId}:`, err.message);
+                // WebSocket errors ke case mein res object HTTP response nahi hota
+                if (res && res.writeHead) {
+                    res.writeHead(502, { 'Content-Type': 'text/plain' });
+                    res.end('Proxy Error: Sandbox might be down or restarting.');
+                }
+            }
         })
     }
     return proxies[ sandboxId ];
@@ -40,6 +48,13 @@ function getAgentProxy(sandboxId) {
             target,
             changeOrigin: true,
             ws: true,
+            onError: (err, req, res) => {
+                console.error(`[Proxy Error] Agent ${sandboxId}:`, err.message);
+                if (res && res.writeHead) {
+                    res.writeHead(502, { 'Content-Type': 'text/plain' });
+                    res.end('Proxy Error: Agent might be down or restarting.');
+                }
+            }
         })
     }
 
