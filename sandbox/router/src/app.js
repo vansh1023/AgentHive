@@ -16,7 +16,7 @@ app.get('/api/status/readyz', (req, res) => {
 const proxies = {}
 const agentProxies = {}
 
-function getProxy(sandboxId) {
+export function getProxy(sandboxId) {
 
     const target = `http://sandbox-service-${sandboxId}`; // Construct target URL based on sandboxId
 
@@ -39,7 +39,7 @@ function getProxy(sandboxId) {
 }
 
 
-function getAgentProxy(sandboxId) {
+export function getAgentProxy(sandboxId) {
 
     const target = `http://sandbox-service-${sandboxId}:3000`; // Construct target URL based on sandboxId
 
