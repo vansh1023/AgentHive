@@ -1,9 +1,15 @@
 import express from 'express';
 import morgan from 'morgan';
-import { createProxyMiddleware } from "http-proxy-middleware"
+import { createProxyMiddleware } from "http-proxy-middleware";
+import http from 'http';
 
 const app = express();
 app.use(morgan('combined'));
+
+app.use((req, res, next) => {
+    console.log(`[ROUTER LOG] Incoming Request: ${req.method} ${req.url} on Host: ${req.headers.host}`);
+    next();
+});
 
 app.get('/api/status/healthz', (req, res) => {
     res.status(200).json({ status: 'ok' });
@@ -16,7 +22,7 @@ app.get('/api/status/readyz', (req, res) => {
 const proxies = {}
 const agentProxies = {}
 
-export function getProxy(sandboxId) {
+function getProxy(sandboxId) {
 
     const target = `http://sandbox-service-${sandboxId}`; // Construct target URL based on sandboxId
 
@@ -39,7 +45,7 @@ export function getProxy(sandboxId) {
 }
 
 
-export function getAgentProxy(sandboxId) {
+function getAgentProxy(sandboxId) {
 
     const target = `http://sandbox-service-${sandboxId}:3000`; // Construct target URL based on sandboxId
 
@@ -76,4 +82,26 @@ app.use((req, res, next) => {
     
 })
 
-export default app
+
+const server = http.createServer(app);
+
+// ✅ Handle WebSocket upgrades — this is what was missing
+server.on('upgrade', (req, socket, head) => {
+    const host = req.headers.host;
+    const sandboxId = host.split('.')[ 0 ];
+    const type = host.split('.')[ 1 ];
+
+    console.log(`WS upgrade request: ${host}, sandboxId: ${sandboxId}, type: ${type}`);
+
+    if (type === 'agent') {
+        const proxy = getAgentProxy(sandboxId);
+        proxy.upgrade(req, socket, head);
+    } else if (type === 'preview') {
+        const proxy = getProxy(sandboxId);
+        proxy.upgrade(req, socket, head);
+    } else {
+        socket.destroy();
+    }
+});
+
+export default server;
