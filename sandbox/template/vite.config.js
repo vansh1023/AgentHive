@@ -10,11 +10,12 @@ export default defineConfig({
     allowedHosts: true,
     hmr: {
       clientPort: 80,  // <-- Ye line bohot important hai ingress/proxy ke liye
-      overlay: false
+      overlay: false,
+      protocol: 'ws',
     },
     watch: {
       usePolling: true,
-      interval: 1000,
+      interval: 300,
       binaryInterval: 3000, // Binary files ke liye aur slow polling
       ignored: ['**/node_modules/**', '**/.git/**'] // In directories ko strictly ignore karein
     }

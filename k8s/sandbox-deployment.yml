@@ -8,11 +8,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: sandbox-server
+      app: sandbox
   template:
     metadata:
       labels:
-        app: sandbox-server
+        app: sandbox
     spec:
       serviceAccountName: resource-manager
       containers:
